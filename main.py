@@ -1,7 +1,7 @@
 import telebot
 from telebot.types import ReplyKeyboardMarkup
 
-TOKEN = "8604792068:AAEb0wk2L1fUYnIxD1q4Qm7U4eh0GQVATWs"
+TOKEN = "8604792068:AAG4RPsxyvnTLpWUCjvxXl6FitCsBpdGLvo"
 bot = telebot.TeleBot(TOKEN)
 
 ADMIN_ID = 7268416193
