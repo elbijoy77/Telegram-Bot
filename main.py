@@ -1,7 +1,12 @@
+import os
 import telebot
-from telebot.types import ReplyKeyboardMarkup
 
-TOKEN = "8604792068:AAG4RPsxyvnTLpWUCjvxXl6FitCsBpdGLvo"
+TOKEN = os.getenv("8604792068:AAG4RPsxyvnTLpWUCjvxXl6FitCsBpdGLvo")
+
+if not TOKEN:
+    print("8604792068:AAG4RPsxyvnTLpWUCjvxXl6FitCsBpdGLvo")
+    exit()
+
 bot = telebot.TeleBot(TOKEN)
 
 ADMIN_ID = 7268416193
@@ -10,7 +15,7 @@ balance = {}
 orders = {}
 pending = {}
 
-# ================= MENU =================
+#========== MENU =================
 def main_menu():
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.row("🛒 অর্ডার", "💳 ডিপোজিট")
@@ -20,25 +25,25 @@ def main_menu():
 
 # ================= SERVICE PRICE =================
 services = {
-    "TikTok Likes": 30,
-    "TikTok Views": 10,
-    "TikTok Followers": 200,
+    "TikTok Likes": 30tk,
+    "TikTok Views": 10tk,
+    "TikTok Followers": 200tk,
 
-    "Telegram Reaction": 15,
-    "Telegram Views": 5,
-    "Telegram Subscriber": 30,
+    "Telegram Reaction": 15tk,
+    "Telegram Views": 5tk,
+    "Telegram Subscriber": 30tk,
 
-    "Facebook Reaction": 70,
-    "Facebook Views": 20,
-    "Facebook Followers": 300,
+    "Facebook Reaction": 70tk,
+    "Facebook Views": 20tk,
+    "Facebook Followers": 300tk,
 
-    "Instagram Likes": 50,
-    "Instagram Views": 5,
-    "Instagram Followers": 120,
+    "Instagram Likes": 50tk,
+    "Instagram Views": 5tk,
+    "Instagram Followers": 120tk,
 
-    "YouTube Likes": 50,
-    "YouTube Views": 70,
-    "YouTube Subscriber": 100
+    "YouTube Likes": 50tk,
+    "YouTube Views": 70tk,
+    "YouTube Subscriber": 100tk,
 }
 
 MIN_ORDER = 100
@@ -261,8 +266,7 @@ def add(message):
 
     except:
         bot.send_message(ADMIN_ID, "❌ /add user_id amount")
-
-# ================= SUPPORT =================
+================= SUPPORT =================
 @bot.message_handler(func=lambda m: m.text == "🆘 সাপোর্ট")
 def support(message):
     bot.send_message(message.chat.id, "📞 যোগাযোগ: @BOOM_BHAI")
