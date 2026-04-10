@@ -7,6 +7,7 @@ bot = telebot.TeleBot(TOKEN)
 ADMIN_ID = 7268416193
 
 balance = {}
+orders = {}
 pending = {}
 
 # ================= MENU =================
@@ -16,6 +17,31 @@ def main_menu():
     markup.row("📦 Order Status", "👤 My Account")
     markup.row("📊 Price & Info", "🆘 Support")
     return markup
+
+# ================= SERVICES =================
+services = {
+    "TikTok Likes": 30,
+    "TikTok Views": 10,
+    "TikTok Followers": 200,
+
+    "Telegram Reaction": 15,
+    "Telegram Views": 5,
+    "Telegram Subscribers": 30,
+
+    "Facebook Reactions": 70,
+    "Facebook Views": 20,
+    "Facebook Followers": 300,
+
+    "Instagram Likes": 50,
+    "Instagram Views": 5,
+    "Instagram Followers": 120,
+
+    "YouTube Likes": 50,
+    "YouTube Views": 70,
+    "YouTube Subscribers": 100
+}
+
+MIN_ORDER = 100
 
 # ================= START =================
 @bot.message_handler(commands=['start'])
@@ -27,68 +53,115 @@ def start(message):
     bot.send_message(uid, f"""
 🏡 WELCOME TO SMM PANEL
 
-👤 User ID: {uid}
 💰 Balance: {balance[uid]}৳
 
-Menu থেকে অপশন বেছে নিন 👇
+Choose menu below 👇
 """, reply_markup=main_menu())
 
-# ================= PRICE LIST =================
+# ================= ORDER MENU =================
+@bot.message_handler(func=lambda m: m.text == "🛒 Order")
+def order(message):
+    text = "📦 Available Services:\n\n"
+    for s, p in services.items():
+        text += f"{s} - {p}৳ (Min {MIN_ORDER})\n"
+
+    text += "\n👉 Type service name to order"
+    bot.send_message(message.chat.id, text)
+
+# ================= CREATE ORDER =================
+@bot.message_handler(func=lambda m: m.text in services.keys())
+def create_order(message):
+    uid = message.chat.id
+    service = message.text
+    price = services[service]
+
+    qty = MIN_ORDER  # default minimum order
+
+    total = price
+
+    if balance.get(uid, 0) < total:
+        bot.send_message(uid, "❌ Not enough balance")
+        return
+
+    balance[uid] -= total
+
+    order_id = len(orders) + 1
+    orders[order_id] = {
+        "user": uid,
+        "service": service,
+        "status": "Processing"
+    }
+
+    bot.send_message(uid, f"""
+✅ Order Placed
+
+Order ID: {order_id}
+Service: {service}
+Quantity: {qty}
+Status: Processing
+""")
+
+# ================= ORDER STATUS =================
+@bot.message_handler(func=lambda m: m.text == "📦 Order Status")
+def status(message):
+    uid = message.chat.id
+
+    text = "📦 Your Orders:\n\n"
+    found = False
+
+    for oid, data in orders.items():
+        if data["user"] == uid:
+            text += f"""
+Order ID: {oid}
+Service: {data['service']}
+Status: {data['status']}
+------------------
+"""
+            found = True
+
+    if not found:
+        text = "❌ No orders yet"
+
+    bot.send_message(uid, text)
+
+# ================= ACCOUNT =================
+@bot.message_handler(func=lambda m: m.text == "👤 My Account")
+def account(message):
+    uid = message.chat.id
+    bot.send_message(uid, f"💰 Balance: {balance.get(uid,0)}৳")
+
+# ================= PRICE INFO =================
 @bot.message_handler(func=lambda m: m.text == "📊 Price & Info")
 def price(message):
     bot.send_message(message.chat.id, """
-━━━━━━━━━━━━━━━━━━━━━━
-📲 EL SMM ZONE – SERVICE LIST
-━━━━━━━━━━━━━━━━━━━━━━
+📊 SMM PANEL SERVICES
 
-🔵 TELEGRAM
-👁️ 1K Views — 5 Taka
-❤️ 1K Reacts — 15 Taka
-👥 1K Members — 30 Taka
+✔ TikTok: Likes / Views / Followers
+✔ Telegram: Reaction / Views / Subs
+✔ Facebook: React / Views / Followers
+✔ Instagram: Likes / Views / Followers
+✔ YouTube: Likes / Views / Subscribers
 
-🔷 FACEBOOK
-🎥 1K Views — 20 Taka
-👤 1K Followers — 300 Taka
-😍 1K Reactions — 70 Taka
-
-🟣 INSTAGRAM
-👁️ 1K Views — 5 Taka
-❤️ 1K Likes — 50 Taka
-⭐ 1K Followers — 120 Taka
-
-⚫ TIKTOK
-👁️ 1K Views — 10 Taka
-👍 1K Likes — 30 Taka
-⭐ 1K Followers — 200 Taka
-
-🔴 YOUTUBE
-👍 1K Likes — 50 Taka
-🔔 1K Subscribers — 100 Taka
-▶️ 1K Views — 70 Taka
-
-━━━━━━━━━━━━━━━━━━━━━━
+⚠ Min Order: 100
 """)
 
 # ================= DEPOSIT =================
 @bot.message_handler(func=lambda m: m.text == "💳 Deposit")
 def deposit(message):
     bot.send_message(message.chat.id, """
-💰 DEPOSIT METHOD
+💰 Deposit Method
 
-━━━━━━━━━━━━━━━━━━
-🟣 bKash  →  01819708679
-🟠 Nagad  →  01895288899
-━━━━━━━━━━━━━━━━━━
+🟣 bKash: 01819708679
+🟠 Nagad: 01895288899
 
-💸 কত টাকা ডিপোজিট করবেন? (শুধু সংখ্যা লিখুন)
+👉 Send Money & send screenshot
 """)
 
-# amount input
+# amount
 @bot.message_handler(func=lambda m: m.text and m.text.isdigit())
 def amount(message):
-    uid = message.chat.id
-    pending[uid] = int(message.text)
-    bot.send_message(uid, "📸 Payment screenshot পাঠান")
+    pending[message.chat.id] = int(message.text)
+    bot.send_message(message.chat.id, "📸 Send payment screenshot")
 
 # screenshot
 @bot.message_handler(content_types=['photo'])
@@ -105,20 +178,14 @@ def photo(message):
 💰 Deposit Request
 
 User: {uid}
-Amount: {amt}৳
+Amount: {amt}
 
 Approve:
 /add {uid} {amt}
 """
         )
 
-        bot.send_message(uid, "✅ Request sent to admin")
-
-# ================= ACCOUNT =================
-@bot.message_handler(func=lambda m: m.text == "👤 My Account")
-def account(message):
-    uid = message.chat.id
-    bot.send_message(uid, f"💰 Balance: {balance.get(uid,0)}৳")
+        bot.send_message(uid, "✅ Sent to admin")
 
 # ================= ADMIN ADD =================
 @bot.message_handler(commands=['add'])
@@ -133,11 +200,11 @@ def add(message):
 
         balance[uid] = balance.get(uid,0) + amt
 
-        bot.send_message(uid, f"✅ {amt}৳ added to your account")
+        bot.send_message(uid, f"✅ {amt}৳ added")
         bot.send_message(ADMIN_ID, "✔ Done")
 
     except:
-        bot.send_message(ADMIN_ID, "❌ Use: /add user_id amount")
+        bot.send_message(ADMIN_ID, "❌ /add user_id amount")
 
 # ================= SUPPORT =================
 @bot.message_handler(func=lambda m: m.text == "🆘 Support")
