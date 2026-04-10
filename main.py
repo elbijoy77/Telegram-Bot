@@ -266,7 +266,7 @@ def add(message):
 
     except:
         bot.send_message(ADMIN_ID, "❌ /add user_id amount")
-================= SUPPORT =================
+#================= SUPPORT =================
 @bot.message_handler(func=lambda m: m.text == "🆘 সাপোর্ট")
 def support(message):
     bot.send_message(message.chat.id, "📞 যোগাযোগ: @BOOM_BHAI")
