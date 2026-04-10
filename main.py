@@ -25,25 +25,25 @@ def main_menu():
 
 # ================= SERVICE PRICE =================
 services = {
-    "TikTok Likes": 30tk,
-    "TikTok Views": 10tk,
-    "TikTok Followers": 200tk,
+    "TikTok Likes": 30,
+    "TikTok Views": 10,
+    "TikTok Followers": 200,
 
-    "Telegram Reaction": 15tk,
-    "Telegram Views": 5tk,
-    "Telegram Subscriber": 30tk,
+    "Telegram Reaction": 15,
+    "Telegram Views": 5,
+    "Telegram Subscriber": 30,
 
-    "Facebook Reaction": 70tk,
-    "Facebook Views": 20tk,
-    "Facebook Followers": 300tk,
+    "Facebook Reaction": 70,
+    "Facebook Views": 20,
+    "Facebook Followers": 300,
 
-    "Instagram Likes": 50tk,
-    "Instagram Views": 5tk,
-    "Instagram Followers": 120tk,
+    "Instagram Likes": 50,
+    "Instagram Views": 5,
+    "Instagram Followers": 120,
 
-    "YouTube Likes": 50tk,
-    "YouTube Views": 70tk,
-    "YouTube Subscriber": 100tk,
+    "YouTube Likes": 50,
+    "YouTube Views": 70,
+    "YouTube Subscriber": 100
 }
 
 MIN_ORDER = 100
