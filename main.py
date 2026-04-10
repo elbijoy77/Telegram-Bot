@@ -1,4 +1,3 @@
-main.py
 import telebot
 from telebot.types import ReplyKeyboardMarkup
 
