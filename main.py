@@ -4,10 +4,19 @@ import telebot
 TOKEN = os.getenv("8604792068:AAG4RPsxyvnTLpWUCjvxXl6FitCsBpdGLvo")
 
 if not TOKEN:
-    print("8604792068:AAG4RPsxyvnTLpWUCjvxXl6FitCsBpdGLvo")
+    print("TOKEN missing!")
     exit()
 
 bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, "✅ Bot is working!")
+
+print("Bot Running...")
+bot.infinity_polling(skip_pending=True)
+
+
 
 ADMIN_ID = 7268416193
 
