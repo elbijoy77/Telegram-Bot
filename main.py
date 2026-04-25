@@ -18,32 +18,8 @@ def main_menu():
     markup.row("📊 প্রাইস ও ইনফো", "🆘 সাপোর্ট")
     return markup
 
-# ================= SERVICE PRICE =================
-services = {
-    "TikTok Likes": 30,
-    "TikTok Views": 10,
-    "TikTok Followers": 200,
 
-    "Telegram Reaction": 15,
-    "Telegram Views": 5,
-    "Telegram Subscriber": 30,
-
-    "Facebook Reaction": 70,
-    "Facebook Views": 20,
-    "Facebook Followers": 300,
-
-    "Instagram Likes": 50,
-    "Instagram Views": 5,
-    "Instagram Followers": 120,
-
-    "YouTube Likes": 50,
-    "YouTube Views": 70,
-    "YouTube Subscriber": 100
-}
-
-MIN_ORDER = 100
-
-# ================= START =================
+#================= START =================
 @bot.message_handler(commands=['start'])
 def start(message):
     uid = message.chat.id
@@ -60,69 +36,145 @@ def start(message):
 📲 নিচের মেনু থেকে নির্বাচন করুন 👇
 """, reply_markup=main_menu())
 
-# ================= ORDER =================
+# ================= SERVICE MENU =================
+
 @bot.message_handler(func=lambda m: m.text == "🛒 অর্ডার")
-def order(message):
-    bot.send_message(message.chat.id, """
-━━━━━━━━━━━━━━━━━━━━━━
-📲 EL SMM ZONE সার্ভিস লিস্ট
-━━━━━━━━━━━━━━━━━━━━━━
+def order_menu(msg):
+    bot.send_message(msg.chat.id,
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "📲 EL SMM ZONE – SERVICE LIST 🚀\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
 
-🔵 টেলিগ্রাম
-👁️ ভিউ | ❤️ রিঅ্যাকশন | 👥 সাবস্ক্রাইবার
+        "🔵 টেলিগ্রাম সার্ভিস\n"
+        "1. 📈 Telegram Views\n"
+        "2. ❤️ Telegram Reactions\n"
+        "3. 👥 Telegram Subscribers\n\n"
 
-🔷 ফেসবুক
-🎥 ভিউ | 😍 রিঅ্যাক্ট | 👤 ফলোয়ার
+        "🔷 ফেসবুক সার্ভিস\n"
+        "4. 🎥 Facebook Views\n"
+        "5. 😍 Facebook Reacts\n"
+        "6. 👤 Facebook Followers\n\n"
 
-🟣 ইনস্টাগ্রাম
-👁️ ভিউ | ❤️ লাইক | ⭐ ফলোয়ার
+        "🟣 ইনস্টাগ্রাম সার্ভিস\n"
+        "7. 👁️ Instagram Views\n"
+        "8. ❤️ Instagram Likes\n"
+        "9. ⭐ Instagram Followers\n\n"
 
-⚫ টিকটক
-👁️ ভিউ | 👍 লাইক | ⭐ ফলোয়ার
+        "⚫ টিকটক সার্ভিস\n"
+        "10. 👁️ TikTok Views\n"
+        "11. 👍 TikTok Likes\n"
+        "12. ⭐ TikTok Followers\n\n"
 
-🔴 ইউটিউব
-▶️ ভিউ | 👍 লাইক | 🔔 সাবস্ক্রাইবার
+        "🔴 ইউটিউব সার্ভিস\n"
+        "13. ▶️ YouTube Views\n"
+        "14. 👍 YouTube Likes\n"
+        "15. 🔔 YouTube Subscribers\n\n"
 
-━━━━━━━━━━━━━━━━━━━━━━
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "❓ সার্ভিস নম্বর লিখুন\n"
+        "⚠️ মিনিমাম অর্ডার: 100\n"
+        "━━━━━━━━━━━━━━━━━━━━━━"
+    )
 
-⚠️ মিনিমাম অর্ডার: 100 থেকে শুরু
-👉 সার্ভিসের নাম লিখে অর্ডার করুন
-""")
+    user_step[msg.chat.id] = "service"
 
-# ================= CREATE ORDER =================
-@bot.message_handler(func=lambda m: m.text in services.keys())
-def create_order(message):
-    uid = message.chat.id
-    service = message.text
-    price = services[service]
 
-    if balance.get(uid, 0) < price:
-        bot.send_message(uid, "❌ দুঃখিত! আপনার পর্যাপ্ত ব্যালেন্স নেই 😢")
+# ================= ORDER FLOW =================
+
+@bot.message_handler(func=lambda m: True)
+def handle_order(msg):
+    uid = msg.chat.id
+    text = msg.text
+
+    if uid not in user_step:
         return
 
-    balance[uid] -= price
+    # STEP 1: SERVICE SELECT
+    if user_step[uid] == "service":
 
-    order_id = len(orders) + 1
-    orders[order_id] = {
-        "user": uid,
-        "service": service,
-        "status": "প্রসেসিং ⏳"
-    }
+        if text not in services:
+            bot.send_message(uid, "❌ ভুল সার্ভিস নম্বর")
+            return
 
-    bot.send_message(uid, f"""
-━━━━━━━━━━━━━━
-✅ অর্ডার সফল হয়েছে 🎉
-━━━━━━━━━━━━━━
+        temp_order[uid] = {
+            "service": services[text],
+            "sid": text
+        }
 
-🆔 অর্ডার আইডি: {order_id}
-📦 সার্ভিস: {service}
-💰 মূল্য: {price}৳
-⏳ স্ট্যাটাস: প্রসেসিং
+        user_step[uid] = "link"
+        bot.send_message(uid, "🔗 আপনার লিংক দিন")
 
-🙏 ধন্যবাদ আমাদের সাথে থাকার জন্য!
-""")
+    # STEP 2: LINK
+    elif user_step[uid] == "link":
 
-# ================= ORDER STATUS =================
+        temp_order[uid]["link"] = text
+        user_step[uid] = "qty"
+
+        bot.send_message(uid, "🔢 পরিমাণ লিখুন (মিনিমাম 100)")
+
+    # STEP 3: QUANTITY + ORDER CREATE
+    elif user_step[uid] == "qty":
+
+        if not text.isdigit() or int(text) < 100:
+            bot.send_message(uid, "❌ মিনিমাম 100 দিতে হবে")
+            return
+
+        qty = int(text)
+        sid = temp_order[uid]["sid"]
+
+        # PRICE CALCULATION
+        cost = (qty / 1000) * prices[sid]
+        cost = round(cost, 2)
+
+        # BALANCE CHECK
+        if balance.get(uid, 0) < cost:
+            bot.send_message(uid,
+                f"❌ পর্যাপ্ত ব্যালেন্স নেই\n\n"
+                f"💰 লাগবে: {cost}৳\n"
+                f"💼 আপনার ব্যালেন্স: {balance.get(uid,0)}৳"
+            )
+            user_step[uid] = None
+            return
+
+        # BALANCE CUT
+        balance[uid] -= cost
+
+        # ORDER ID
+        order_id = len(orders) + 1
+
+        orders[order_id] = {
+            "user": uid,
+            "service": temp_order[uid]["service"],
+            "link": temp_order[uid]["link"],
+            "quantity": qty,
+            "price": cost,
+            "status": "Processing"
+        }
+
+        # USER MSG
+        bot.send_message(uid,
+            f"✅ অর্ডার সফল!\n\n"
+            f"🆔 Order ID: {order_id}\n"
+            f"📦 Service: {temp_order[uid]['service']}\n"
+            f"🔢 Quantity: {qty}\n"
+            f"💰 Cost: {cost}৳\n"
+            f"💼 Remaining Balance: {balance[uid]}৳"
+        )
+
+        # ADMIN MSG
+        bot.send_message(ADMIN_ID,
+            f"📥 নতুন অর্ডার\n\n"
+            f"🆔 ID: {order_id}\n"
+            f"👤 User: {uid}\n"
+            f"📦 Service: {temp_order[uid]['service']}\n"
+            f"🔗 Link: {temp_order[uid]['link']}\n"
+            f"🔢 Quantity: {qty}\n"
+            f"💰 Price: {cost}৳"
+        )
+
+        user_step[uid] = None
+
+#================= ORDER STATUS =================
 @bot.message_handler(func=lambda m: m.text == "📦 অর্ডার স্ট্যাটাস")
 def status(message):
     uid = message.chat.id
